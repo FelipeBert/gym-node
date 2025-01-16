@@ -1,5 +1,3 @@
-import bcrypt from "bcryptjs"
-import { UserAlreadyExistsError } from "./errors/user-already-exists-error"
 import type { Gym } from "@prisma/client"
 import type { GymRepository } from "@/repositories/gyms-repository"
 
