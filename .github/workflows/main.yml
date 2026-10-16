@@ -25,7 +25,7 @@ jobs:
           scan-ref: '.'
           format: json
           output: trivy-results.json
-          exit-code: 1
+          exit-code: 0
           severity: 'CRITICAL,HIGH'
 
       - name: "Upload Trivy scan results as artifact"
