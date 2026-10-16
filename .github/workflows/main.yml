@@ -64,8 +64,8 @@ jobs:
         with:
           context: .
           file: ./src/Dockerfile
-          # Publish the image and reuse the GitHub Actions build cache.
-          push: true
+          # Publish to Docker Hub only for push events to main; pull requests only build.
+          push: ${{ github.event_name == 'push' }}
           # Append the commit SHA to the image tag to identify the build.
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/api-solid:latest
