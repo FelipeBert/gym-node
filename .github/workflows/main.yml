@@ -1,5 +1,6 @@
 name: Build and Push WF
 
+# Run this workflow for changes targeting the main branch.
 on:
   push:
     branches:
@@ -10,6 +11,7 @@ on:
       - main
 
 jobs:
+  # Identify critical and high vulnerabilities before building the image.
   Security_Scan:
     runs-on: ubuntu-latest
     steps: 
@@ -25,9 +27,11 @@ jobs:
           scan-ref: '.'
           format: json
           output: trivy-results.json
+          # Study purposes only: keep exit-code at 0 so findings do not fail the workflow.
           exit-code: 0
           severity: 'CRITICAL,HIGH'
 
+          # Keep the scan report available for review, including after failures.
       - name: "Upload Trivy scan results as artifact"
         uses: actions/upload-artifact@v4
         if: always()
@@ -35,17 +39,20 @@ jobs:
           name: trivy-scan-results
           path: trivy-results.json
     
+  # Build and publish only after the security scan job completes successfully.
   Build:
     runs-on: ubuntu-latest
+    # Use production environment controls and credentials for publishing.
     environment: production
     needs: Security_Scan
     steps:
       - name: "Code Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "Set up Docker Buildx"
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
+      # Authenticate to Docker Hub using configured variables and secrets.
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
@@ -53,10 +60,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: "Build and Push Docker Image"
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./src/Dockerfile
+          # Publish the image and reuse the GitHub Actions build cache.
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/api-solid:latest
           cache-from: type=gha
