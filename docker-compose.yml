@@ -1,11 +1,46 @@
-version: '3.9'
-
 services:
+# Build and run the API service.
+  api-solid:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    depends_on:
+    # Start the API only after PostgreSQL reports healthy.
+      api-solid-pg:
+        condition: service_healthy
+  # Expose the API on host port 80.
+    ports: 
+      - 80:80
+  # Configure the API runtime, database connection, and JWT secret.
+    environment:
+      - NODE_ENV=dev
+      - PORT=80
+      - DATABASE_URL=postgresql://docker:docker@api-solid-pg:5432/apisolid?schema=public
+      - JWT_SECRET=secret
+# Run Prisma migrations when the API container starts.
+    command: sh -c "npx prisma migrate deploy && node build/server.cjs"
+
+# Run PostgreSQL as the API's database.
   api-solid-pg:
     image: bitnami/postgresql
+  # Verify PostgreSQL can accept connections to the configured database.
+    healthcheck:
+      # Checks whether PostgreSQL is ready to accept connections for the apisolid database as user docker.
+      test: ["CMD-SHELL", "pg_isready -U docker -d apisolid"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+  # Expose PostgreSQL on host port 5432 for local access.
     ports:
       - 5432:5432
+  # Set the initial database name and credentials.
     environment:
       - POSTGRESQL_USERNAME=docker
       - POSTGRESQL_PASSWORD=docker
       - POSTGRESQL_DATABASE=apisolid
+  # Keep database files in a named volume so they survive container recreation.
+    volumes:
+      - pg_data:/bitname/postgresql
+
+volumes:
+  pg_data:

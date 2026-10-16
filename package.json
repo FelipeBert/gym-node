@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node build/server.js",
+    "start": "node build/server.cjs",
     "start:dev": "tsx watch src/server.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "lint": "eslint",
-    "build": "tsup src --out-dir build"
+    "build": "tsup src/server.ts --out-dir build"
   },
   "keywords": [],
   "author": "Felipe Bertulino",
