@@ -66,7 +66,8 @@ jobs:
           file: ./src/Dockerfile
           # Publish the image and reuse the GitHub Actions build cache.
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/api-solid:latest
+          # Append the commit SHA to the image tag to identify the build.
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/api-solid:latest:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
