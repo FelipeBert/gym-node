@@ -70,7 +70,9 @@ jobs:
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/api-solid:latest
             ${{ vars.DOCKERHUB_USERNAME }}/api-solid:${{ github.sha }}
+          # Restore cached BuildKit layers from the GitHub Actions cache to speed up builds.
           cache-from: type=gha
+          # Save the build cache to GitHub Actions; mode=max includes intermediate build layers.
           cache-to: type=gha,mode=max
 
     
