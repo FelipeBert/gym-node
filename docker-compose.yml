@@ -15,8 +15,8 @@ services:
     environment:
       - NODE_ENV=dev
       - PORT=80
-      - DATABASE_URL=postgresql://docker:docker@api-solid-pg:5432/apisolid?schema=public
-      - JWT_SECRET=secret
+      - DATABASE_URL=${{ secrets.DATABASE_URL }}
+      - JWT_SECRET=${{ secrets.JWT_SECRET }}
 # Run Prisma migrations when the API container starts.
     command: sh -c "npx prisma migrate deploy && node build/server.cjs"
 
@@ -26,7 +26,7 @@ services:
   # Verify PostgreSQL can accept connections to the configured database.
     healthcheck:
       # Checks whether PostgreSQL is ready to accept connections for the apisolid database as user docker.
-      test: ["CMD-SHELL", "pg_isready -U docker -d apisolid"]
+      test: ["CMD-SHELL", "pg_isready -U docker -d $POSTGRESQL_DATABASE"]
       interval: 5s
       timeout: 5s
       retries: 3
@@ -35,9 +35,9 @@ services:
       - 5432:5432
   # Set the initial database name and credentials.
     environment:
-      - POSTGRESQL_USERNAME=docker
-      - POSTGRESQL_PASSWORD=docker
-      - POSTGRESQL_DATABASE=apisolid
+      - POSTGRESQL_USERNAME=${{ secrets.DATABASE_USERNAME }}
+      - POSTGRESQL_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+      - POSTGRESQL_DATABASE=${{ vars.DATABASE_NAME }}
   # Keep database files in a named volume so they survive container recreation.
     volumes:
       - pg_data:/bitname/postgresql
